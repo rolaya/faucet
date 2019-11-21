@@ -6,10 +6,11 @@
 faucet_provision()
 {
 	# Create directories required by faucet docker container 
-	sudo mkdir -p /etc/faucet
-	sudo mkdir -p /var/log/faucet/
-	sudo cp provision/faucet.yaml /etc/faucet/faucet.yaml
-	sudo chmod a+w /etc/faucet/faucet.yaml
+  # as per https://docs.openvswitch.org/en/latest/tutorials/faucet/
+	mkdir inst
+
+  # Set Dockerfile to use for container build
+  cp Dockerfile.faucet Dockerfile
 }
 
 #==================================================================================================================
@@ -18,7 +19,7 @@ faucet_provision()
 faucet_docker_container_build()
 {
 	# Build docker container
-	docker build -t faucet/faucet adapters/vendors/faucetagent
+	docker build -t faucet/faucet .
 }
 
 #==================================================================================================================
@@ -30,8 +31,8 @@ faucet_start()
 	docker run -d \
 		--name faucet \
 		--restart=always \
-		-v /etc/faucet/:/etc/faucet/ \
-		-v /var/log/faucet/:/var/log/faucet/ \
+		-v $(pwd)/inst/:/etc/faucet/ \
+		-v $(pwd)/inst/:/var/log/faucet/ \
 		-p 6653:6653 \
 		-p 9302:9302 \
 		faucet/faucet
